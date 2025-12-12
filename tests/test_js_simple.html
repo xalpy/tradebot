@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест JavaScript</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer; margin: 10px; }
+        button:hover { background: #0056b3; }
+        .log { background: #f8f9fa; padding: 10px; margin-top: 20px; border: 1px solid #dee2e6; height: 300px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <h1>Тест JavaScript</h1>
+    
+    <button id="testBtn">Тестовая кнопка</button>
+    <button id="backtestBtn">Кнопка бектеста</button>
+    
+    <div class="log" id="log">
+        <h3>Лог событий:</h3>
+        <div id="logContent"></div>
+    </div>
+
+    <script>
+        function log(message) {
+            const logContent = document.getElementById('logContent');
+            const timestamp = new Date().toLocaleTimeString();
+            logContent.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            logContent.scrollTop = logContent.scrollHeight;
+            console.log(message);
+        }
+
+        log('📜 Страница загружена');
+
+        // Обработчик DOMContentLoaded
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🚀 DOM загружен');
+            
+            // Тестовая кнопка
+            const testBtn = document.getElementById('testBtn');
+            if (testBtn) {
+                log('✅ Тестовая кнопка найдена');
+                testBtn.addEventListener('click', function() {
+                    log('🔄 Тестовая кнопка нажата');
+                });
+            } else {
+                log('❌ Тестовая кнопка не найдена');
+            }
+            
+            // Кнопка бектеста
+            const backtestBtn = document.getElementById('backtestBtn');
+            if (backtestBtn) {
+                log('✅ Кнопка бектеста найдена');
+                backtestBtn.addEventListener('click', function() {
+                    log('🔄 Кнопка бектеста нажата');
+                });
+            } else {
+                log('❌ Кнопка бектеста не найдена');
+            }
+        });
+
+        // Проверяем загрузку скриптов
+        window.addEventListener('load', function() {
+            log('📄 Страница полностью загружена');
+        });
+    </script>
+</body>
+</html>
+

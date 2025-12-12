@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>История сделок - TradeBot</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1rem;
+            border-left: 4px solid #667eea;
+        }
+        
+        .trades-table {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .table {
+            margin-bottom: 0;
+        }
+        
+        .table th {
+            background-color: #f8f9fa;
+            border-top: none;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .table td {
+            vertical-align: middle;
+            border-top: 1px solid #dee2e6;
+        }
+        
+        .profit {
+            color: #28a745;
+            font-weight: 600;
+        }
+        
+        .loss {
+            color: #dc3545;
+            font-weight: 600;
+        }
+        
+        .neutral {
+            color: #6c757d;
+            font-weight: 600;
+        }
+        
+        .symbol-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        .side-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .buy-badge {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .sell-badge {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+        }
+        
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+        }
+        
+        .refresh-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+        
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            color: white;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-chart-line me-2"></i>
+                Trading Bot Dashboard
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="fas fa-home me-1"></i>Главная
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/trades">
+                            <i class="fas fa-chart-line me-1"></i>История сделок
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1><i class="fas fa-chart-line me-2"></i>История сделок</h1>
+                    <p class="mb-0">Анализ прибылей и убытков по всем торговым парам</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn refresh-btn" onclick="loadTrades()">
+                        <i class="fas fa-sync-alt me-2"></i>Обновить
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Статистика -->
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-item">
+                <div class="stat-value" id="totalSymbols">-</div>
+                <div class="stat-label">Торговых пар</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value profit" id="totalProfit">-</div>
+                <div class="stat-label">Общая прибыль</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="totalTrades">-</div>
+                <div class="stat-label">Всего сделок</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="totalFees">-</div>
+                <div class="stat-label">Комиссии</div>
+            </div>
+        </div>
+
+        <!-- Таблица сделок -->
+        <div class="trades-table">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-coins me-1"></i>Символ</th>
+                            <th><i class="fas fa-shopping-cart me-1"></i>Покупки</th>
+                            <th><i class="fas fa-hand-holding-usd me-1"></i>Продажи</th>
+                            <th><i class="fas fa-chart-line me-1"></i>PnL</th>
+                            <th><i class="fas fa-percentage me-1"></i>%</th>
+                            <th><i class="fas fa-receipt me-1"></i>Комиссии</th>
+                            <th><i class="fas fa-list me-1"></i>Сделки</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tradesTableBody">
+                        <tr>
+                            <td colspan="7" class="loading">
+                                <i class="fas fa-spinner fa-spin me-2"></i>Загрузка данных...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function formatNumber(num, decimals = 2) {
+            if (num === null || num === undefined) return '-';
+            return parseFloat(num).toFixed(decimals);
+        }
+
+        function formatCurrency(num) {
+            if (num === null || num === undefined) return '-';
+            const formatted = parseFloat(num).toFixed(2);
+            return formatted + ' USDT';
+        }
+
+        function formatPercentage(num) {
+            if (num === null || num === undefined) return '-';
+            const formatted = parseFloat(num).toFixed(2);
+            return formatted + '%';
+        }
+
+        function getPnLClass(pnl) {
+            if (pnl > 0) return 'profit';
+            if (pnl < 0) return 'loss';
+            return 'neutral';
+        }
+
+        function formatTime(timestamp) {
+            if (!timestamp) return '-';
+            const date = new Date(parseInt(timestamp));
+            return date.toLocaleString('ru-RU');
+        }
+
+        function loadTrades() {
+            const tableBody = document.getElementById('tradesTableBody');
+            const statsGrid = document.getElementById('statsGrid');
+            
+            // Показываем загрузку
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="loading">
+                        <i class="fas fa-spinner fa-spin me-2"></i>Загрузка данных...
+                    </td>
+                </tr>
+            `;
+
+            fetch('/api/trades/bybit')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        displayTrades(data.trades);
+                        updateStats(data.trades);
+                    } else {
+                        showError(data.error || 'Ошибка загрузки данных');
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    showError('Ошибка соединения с сервером');
+                });
+        }
+
+        function displayTrades(trades) {
+            const tableBody = document.getElementById('tradesTableBody');
+            
+            if (trades.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center text-muted">
+                            <i class="fas fa-info-circle me-2"></i>Нет данных о сделках
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            let html = '';
+            trades.forEach(trade => {
+                const pnlClass = getPnLClass(trade.pnl);
+                const pnlSign = trade.pnl > 0 ? '+' : '';
+                
+                html += `
+                    <tr>
+                        <td>
+                            <span class="symbol-badge">${trade.symbol}</span>
+                        </td>
+                        <td>
+                            <div class="fw-bold">${formatNumber(trade.total_buy_qty)}</div>
+                            <small class="text-muted">${formatCurrency(trade.total_buy_value)}</small>
+                        </td>
+                        <td>
+                            <div class="fw-bold">${formatNumber(trade.total_sell_qty)}</div>
+                            <small class="text-muted">${formatCurrency(trade.total_sell_value)}</small>
+                        </td>
+                        <td>
+                            <span class="${pnlClass}">
+                                ${pnlSign}${formatCurrency(trade.pnl)}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="${pnlClass}">
+                                ${pnlSign}${formatPercentage(trade.pnl_percentage)}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="text-muted">${formatCurrency(trade.total_fees)}</span>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary" 
+                                    onclick="showTradeDetails('${trade.symbol}', ${JSON.stringify(trade.trades).replace(/"/g, '&quot;')})">
+                                <i class="fas fa-eye me-1"></i>${trade.trades.length}
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tableBody.innerHTML = html;
+        }
+
+        function updateStats(trades) {
+            let totalProfit = 0;
+            let totalTrades = 0;
+            let totalFees = 0;
+            
+            trades.forEach(trade => {
+                totalProfit += trade.pnl || 0;
+                totalTrades += trade.trades.length;
+                totalFees += trade.total_fees || 0;
+            });
+            
+            document.getElementById('totalSymbols').textContent = trades.length;
+            document.getElementById('totalProfit').textContent = formatCurrency(totalProfit);
+            document.getElementById('totalProfit').className = `stat-value ${getPnLClass(totalProfit)}`;
+            document.getElementById('totalTrades').textContent = totalTrades;
+            document.getElementById('totalFees').textContent = formatCurrency(totalFees);
+        }
+
+        function showTradeDetails(symbol, trades) {
+            let html = `
+                <div class="modal fade" id="tradeDetailsModal" tabindex="-1">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">
+                                    <i class="fas fa-list me-2"></i>Детали сделок - ${symbol}
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Время</th>
+                                                <th>Тип</th>
+                                                <th>Количество</th>
+                                                <th>Цена</th>
+                                                <th>Сумма</th>
+                                                <th>Комиссия</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+            `;
+            
+            trades.forEach(trade => {
+                const sideClass = trade.side === 'Buy' ? 'buy-badge' : 'sell-badge';
+                html += `
+                    <tr>
+                        <td><small>${formatTime(trade.time)}</small></td>
+                        <td><span class="side-badge ${sideClass}">${trade.side}</span></td>
+                        <td>${formatNumber(trade.size)}</td>
+                        <td>${formatCurrency(trade.price)}</td>
+                        <td>${formatCurrency(trade.value)}</td>
+                        <td>${formatCurrency(trade.fee)}</td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Удаляем предыдущий модал если есть
+            const existingModal = document.getElementById('tradeDetailsModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            // Добавляем новый модал
+            document.body.insertAdjacentHTML('beforeend', html);
+            
+            // Показываем модал
+            const modal = new bootstrap.Modal(document.getElementById('tradeDetailsModal'));
+            modal.show();
+        }
+
+        function showError(message) {
+            const tableBody = document.getElementById('tradesTableBody');
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="error">
+                        <i class="fas fa-exclamation-triangle me-2"></i>${message}
+                    </td>
+                </tr>
+            `;
+        }
+
+        // Загружаем данные при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTrades();
+        });
+    </script>
+</body>
+</html>

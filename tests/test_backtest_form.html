@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест формы бэктеста</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; }
+        input, select { width: 200px; padding: 5px; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .log { background: #f8f9fa; padding: 10px; margin-top: 20px; border: 1px solid #dee2e6; }
+    </style>
+</head>
+<body>
+    <h1>Тест формы бэктеста</h1>
+    
+    <form id="backtestForm">
+        <div class="form-group">
+            <label for="symbol">Символ:</label>
+            <select id="symbol" name="symbol">
+                <option value="BTCUSDT">BTCUSDT</option>
+                <option value="ETHUSDT">ETHUSDT</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="interval">Интервал:</label>
+            <select id="interval" name="interval">
+                <option value="15">15m</option>
+                <option value="30">30m</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="daysBack">Период (дней):</label>
+            <input type="number" id="daysBack" name="daysBack" value="30">
+        </div>
+        
+        <div class="form-group">
+            <label for="leverage">Плечо:</label>
+            <input type="number" id="leverage" name="leverage" value="10">
+        </div>
+        
+        <div class="form-group">
+            <label for="stopLossPct">Стоп-лосс (%):</label>
+            <input type="number" id="stopLossPct" name="stopLossPct" value="2" step="0.1">
+        </div>
+        
+        <div class="form-group">
+            <label for="takeProfitPct">Тейк-профит (%):</label>
+            <input type="number" id="takeProfitPct" name="takeProfitPct" step="0.1" placeholder="Отключен">
+        </div>
+        
+        <div class="form-group">
+            <label for="initialBalance">Начальный баланс ($):</label>
+            <input type="number" id="initialBalance" name="initialBalance" value="1000">
+        </div>
+        
+        <div class="form-group">
+            <label for="strategyType">Стратегия:</label>
+            <select id="strategyType" name="strategyType">
+                <option value="ghost">Ghost Strategy</option>
+                <option value="ott">OTT Strategy</option>
+                <option value="combined">Combined Strategy</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="tradeSizePct">Размер позиции (%):</label>
+            <input type="number" id="tradeSizePct" name="tradeSizePct" value="3" step="0.1">
+        </div>
+        
+        <button type="submit">Запустить бэктест</button>
+    </form>
+    
+    <div class="log" id="log">
+        <h3>Лог событий:</h3>
+        <div id="logContent"></div>
+    </div>
+
+    <script>
+        function log(message) {
+            const logContent = document.getElementById('logContent');
+            const timestamp = new Date().toLocaleTimeString();
+            logContent.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            logContent.scrollTop = logContent.scrollHeight;
+        }
+
+        // Обработчик формы
+        document.getElementById('backtestForm').addEventListener('submit', function(e) {
+            log('🔄 Форма отправлена, предотвращаем стандартную отправку');
+            e.preventDefault();
+            e.stopPropagation();
+            
+            log('📋 Получаем данные формы...');
+            const formData = new FormData(e.target);
+            
+            const backtestData = {
+                symbol: formData.get('symbol'),
+                interval: formData.get('interval'),
+                days_back: parseInt(formData.get('daysBack')),
+                leverage: parseInt(formData.get('leverage')),
+                stop_loss_pct: parseFloat(formData.get('stopLossPct')),
+                initial_balance: parseFloat(formData.get('initialBalance')),
+                trade_size_pct: parseFloat(formData.get('tradeSizePct')),
+                strategy_type: formData.get('strategyType')
+            };
+            
+            const takeProfitPct = formData.get('takeProfitPct');
+            if (takeProfitPct && takeProfitPct > 0) {
+                backtestData.take_profit_pct = parseFloat(takeProfitPct);
+            }
+            
+            log(`📊 Данные бэктеста: ${JSON.stringify(backtestData, null, 2)}`);
+            
+            // Имитируем отправку на сервер
+            log('📡 Отправляем данные на сервер...');
+            
+            // Здесь можно добавить реальный fetch запрос
+            setTimeout(() => {
+                log('✅ Бэктест завершен (имитация)');
+            }, 1000);
+        });
+
+        log('✅ Страница загружена, обработчики настроены');
+    </script>
+</body>
+</html>

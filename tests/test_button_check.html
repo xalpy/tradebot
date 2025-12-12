@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Проверка кнопки</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .result { background: #f8f9fa; padding: 10px; margin: 10px 0; border: 1px solid #dee2e6; }
+        .success { background: #d4edda; border-color: #c3e6cb; }
+        .error { background: #f8d7da; border-color: #f5c6cb; }
+    </style>
+</head>
+<body>
+    <h1>Проверка кнопки бектеста</h1>
+    
+    <div id="results"></div>
+    
+    <button onclick="checkButton()">Проверить кнопку</button>
+    <button onclick="checkAllElements()">Проверить все элементы</button>
+
+    <script>
+        function addResult(message, isSuccess = true) {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `result ${isSuccess ? 'success' : 'error'}`;
+            div.textContent = message;
+            results.appendChild(div);
+            console.log(message);
+        }
+
+        function checkButton() {
+            addResult('🔍 Проверяем кнопку бектеста...');
+            
+            const button = document.getElementById('runBacktestBtn');
+            if (button) {
+                addResult('✅ Кнопка найдена!');
+                addResult(`📋 Тип кнопки: ${button.type}`);
+                addResult(`📋 ID кнопки: ${button.id}`);
+                addResult(`📋 Текст кнопки: ${button.textContent}`);
+                
+                // Проверяем обработчики
+                const clickHandlers = button.onclick;
+                if (clickHandlers) {
+                    addResult('✅ У кнопки есть обработчик onclick');
+                } else {
+                    addResult('⚠️ У кнопки нет обработчика onclick');
+                }
+            } else {
+                addResult('❌ Кнопка не найдена!', false);
+            }
+        }
+
+        function checkAllElements() {
+            addResult('🔍 Проверяем все элементы...');
+            
+            const elements = [
+                'runBacktestBtn',
+                'backtestForm',
+                'backtestResults',
+                'backtestSymbol',
+                'backtestInterval',
+                'backtestDays',
+                'backtestLeverage',
+                'backtestStopLoss',
+                'backtestTakeProfit',
+                'backtestBalance',
+                'backtestStrategy',
+                'backtestTradeSize'
+            ];
+            
+            elements.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    addResult(`✅ ${id} найден`);
+                } else {
+                    addResult(`❌ ${id} не найден`, false);
+                }
+            });
+        }
+
+        // Автоматическая проверка при загрузке
+        document.addEventListener('DOMContentLoaded', function() {
+            addResult('🚀 DOM загружен, выполняем автоматическую проверку...');
+            setTimeout(checkAllElements, 1000);
+        });
+    </script>
+</body>
+</html>
+

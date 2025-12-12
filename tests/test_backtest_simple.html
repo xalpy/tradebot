@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест бектеста</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; }
+        input, select { width: 200px; padding: 5px; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .result { background: #f8f9fa; padding: 10px; margin-top: 20px; border: 1px solid #dee2e6; }
+    </style>
+</head>
+<body>
+    <h1>Тест бектеста</h1>
+    
+    <form id="backtestForm" onsubmit="return false;">
+        <div class="form-group">
+            <label for="symbol">Символ:</label>
+            <select id="symbol" name="symbol">
+                <option value="BTCUSDT">BTCUSDT</option>
+                <option value="ETHUSDT">ETHUSDT</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="interval">Интервал:</label>
+            <select id="interval" name="interval">
+                <option value="15">15m</option>
+                <option value="30">30m</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="daysBack">Период (дней):</label>
+            <input type="number" id="daysBack" name="daysBack" value="7">
+        </div>
+        
+        <div class="form-group">
+            <label for="leverage">Плечо:</label>
+            <input type="number" id="leverage" name="leverage" value="10">
+        </div>
+        
+        <div class="form-group">
+            <label for="stopLossPct">Стоп-лосс (%):</label>
+            <input type="number" id="stopLossPct" name="stopLossPct" value="2" step="0.1">
+        </div>
+        
+        <div class="form-group">
+            <label for="initialBalance">Начальный баланс ($):</label>
+            <input type="number" id="initialBalance" name="initialBalance" value="1000">
+        </div>
+        
+        <div class="form-group">
+            <label for="strategyType">Стратегия:</label>
+            <select id="strategyType" name="strategyType">
+                <option value="ghost">Ghost Strategy</option>
+                <option value="ott">OTT Strategy</option>
+                <option value="combined">Combined Strategy</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="tradeSizePct">Размер позиции (%):</label>
+            <input type="number" id="tradeSizePct" name="tradeSizePct" value="3" step="0.1">
+        </div>
+        
+        <button type="button" id="runBacktestBtn">Запустить бэктест</button>
+    </form>
+    
+    <div class="result" id="result">
+        <h3>Результат:</h3>
+        <div id="resultContent">Нажмите кнопку для запуска бектеста</div>
+    </div>
+
+    <script>
+        document.getElementById('runBacktestBtn').addEventListener('click', async function() {
+            const resultContent = document.getElementById('resultContent');
+            resultContent.innerHTML = 'Запуск бектеста...';
+            
+            try {
+                const form = document.getElementById('backtestForm');
+                const formData = new FormData(form);
+                
+                const backtestData = {
+                    symbol: formData.get('symbol'),
+                    interval: formData.get('interval'),
+                    days_back: parseInt(formData.get('daysBack')),
+                    leverage: parseInt(formData.get('leverage')),
+                    stop_loss_pct: parseFloat(formData.get('stopLossPct')),
+                    initial_balance: parseFloat(formData.get('initialBalance')),
+                    trade_size_pct: parseFloat(formData.get('tradeSizePct')),
+                    strategy_type: formData.get('strategyType')
+                };
+                
+                console.log('Отправляем данные:', backtestData);
+                
+                const response = await fetch('/api/backtest', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(backtestData)
+                });
+                
+                const result = await response.json();
+                console.log('Результат:', result);
+                
+                if (result.trades !== undefined) {
+                    resultContent.innerHTML = `
+                        <h4>Успешно!</h4>
+                        <p>Всего сделок: ${result.total_trades}</p>
+                        <p>Винрейт: ${result.win_rate}%</p>
+                        <p>Общая прибыль: ${result.total_profit_pct}% ($${result.total_profit_usd})</p>
+                    `;
+                } else {
+                    resultContent.innerHTML = `<p style="color: red;">Ошибка: ${result.error}</p>`;
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                resultContent.innerHTML = `<p style="color: red;">Ошибка: ${error.message}</p>`;
+            }
+        });
+    </script>
+</body>
+</html>
+

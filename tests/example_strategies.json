@@ -1,0 +1,48 @@
+{
+  "strategies": {
+    "BTCUSDT": {
+      "type": "combined",
+      "timeframe": "15",
+      "leverage": 10,
+      "stop_loss": 20,
+      "take_profit": 50,
+      "balance_pct": 3
+    },
+    "ETHUSDT": {
+      "type": "ott",
+      "timeframe": "30",
+      "leverage": 15,
+      "stop_loss": 15,
+      "take_profit": 30,
+      "balance_pct": 2.5
+    },
+    "SOLUSDT": {
+      "type": "ghost",
+      "timeframe": "5",
+      "leverage": 20,
+      "stop_loss": 25,
+      "take_profit": null,
+      "balance_pct": 4
+    },
+    "ADAUSDT": {
+      "type": "combined",
+      "timeframe": "60",
+      "leverage": 8,
+      "stop_loss": 18,
+      "take_profit": 40,
+      "balance_pct": 2
+    }
+  },
+  "config": {
+    "buy_leverage": 10,
+    "sell_leverage": 10,
+    "trade_balance_pct": 3,
+    "stop_loss_pct": 20,
+    "take_profit_pct": null,
+    "trade_interval_sec": 60,
+    "mode": "real",
+    "timeframe": "15"
+  },
+  "exportDate": "2024-01-15T10:30:00.000Z",
+  "version": "1.0"
+}

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug TradingView</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #1a1a1a;
+            color: white;
+        }
+        .debug-info {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+        .error {
+            background: rgba(255,0,0,0.2);
+            border: 1px solid #ff0000;
+        }
+        .success {
+            background: rgba(0,255,0,0.2);
+            border: 1px solid #00ff00;
+        }
+        .warning {
+            background: rgba(255,255,0,0.2);
+            border: 1px solid #ffff00;
+        }
+        #chart-container {
+            width: 100%;
+            height: 500px;
+            border: 2px solid #333;
+            margin: 20px 0;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Debug TradingView</h1>
+    
+    <div id="debug-info" class="debug-info">
+        <h3>Диагностика...</h3>
+        <div id="status"></div>
+    </div>
+    
+    <div>
+        <button onclick="testBasic()">Тест базовой функциональности</button>
+        <button onclick="testTradingView()">Тест TradingView</button>
+        <button onclick="testIframe()">Тест iFrame</button>
+        <button onclick="clearLog()">Очистить лог</button>
+    </div>
+    
+    <div id="chart-container">
+        <div style="text-align: center; padding: 50px;">
+            <h3>Контейнер для графика</h3>
+            <p>Здесь будет отображаться график</p>
+        </div>
+    </div>
+    
+    <div id="log" class="debug-info">
+        <h3>Лог событий:</h3>
+        <div id="log-content"></div>
+    </div>
+
+    <script>
+        let logContent = document.getElementById('log-content');
+        let statusDiv = document.getElementById('status');
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.innerHTML = `<strong>[${timestamp}]</strong> ${message}`;
+            logEntry.className = type;
+            logContent.appendChild(logEntry);
+            console.log(`[${timestamp}] ${message}`);
+        }
+        
+        function updateStatus(message, type = 'info') {
+            statusDiv.innerHTML = message;
+            statusDiv.className = type;
+        }
+        
+        function clearLog() {
+            logContent.innerHTML = '';
+        }
+        
+        function testBasic() {
+            log('🧪 Начинаем базовый тест...', 'info');
+            
+            // Проверка браузера
+            log(`Браузер: ${navigator.userAgent}`, 'info');
+            
+            // Проверка JavaScript
+            if (typeof window !== 'undefined') {
+                log('✅ JavaScript работает', 'success');
+            } else {
+                log('❌ JavaScript не работает', 'error');
+            }
+            
+            // Проверка сетевого соединения
+            if (navigator.onLine) {
+                log('✅ Интернет соединение активно', 'success');
+            } else {
+                log('❌ Нет интернет соединения', 'error');
+            }
+            
+            // Проверка поддержки iframe
+            try {
+                const testIframe = document.createElement('iframe');
+                log('✅ iframe поддерживается', 'success');
+            } catch (e) {
+                log('❌ iframe не поддерживается', 'error');
+            }
+            
+            // Проверка контейнера
+            const container = document.getElementById('chart-container');
+            if (container) {
+                log(`✅ Контейнер найден: ${container.offsetWidth}x${container.offsetHeight}`, 'success');
+            } else {
+                log('❌ Контейнер не найден', 'error');
+            }
+            
+            updateStatus('Базовый тест завершен', 'success');
+        }
+        
+        function testTradingView() {
+            log('📈 Тестируем TradingView...', 'info');
+            
+            // Проверяем, загружен ли TradingView
+            if (typeof TradingView === 'undefined') {
+                log('⚠️ TradingView не загружен, загружаем...', 'warning');
+                
+                const script = document.createElement('script');
+                script.src = 'https://s3.tradingview.com/tv.js';
+                script.onload = function() {
+                    log('✅ TradingView скрипт загружен', 'success');
+                    createTradingViewWidget();
+                };
+                script.onerror = function() {
+                    log('❌ Ошибка загрузки TradingView скрипта', 'error');
+                    updateStatus('Ошибка загрузки TradingView', 'error');
+                };
+                document.head.appendChild(script);
+            } else {
+                log('✅ TradingView уже загружен', 'success');
+                createTradingViewWidget();
+            }
+        }
+        
+        function createTradingViewWidget() {
+            log('🔧 Создаем TradingView виджет...', 'info');
+            
+            const container = document.getElementById('chart-container');
+            container.innerHTML = '';
+            
+            try {
+                const widget = new TradingView.widget({
+                    "width": "100%",
+                    "height": "100%",
+                    "symbol": "BINANCE:BTCUSDT",
+                    "interval": "15",
+                    "timezone": "Europe/Moscow",
+                    "theme": "dark",
+                    "style": "1",
+                    "locale": "ru",
+                    "toolbar_bg": "#f1f3f6",
+                    "enable_publishing": false,
+                    "hide_side_toolbar": false,
+                    "allow_symbol_change": true,
+                    "container_id": "chart-container",
+                    "studies": [
+                        "MASimple@tv-basicstudies",
+                        "RSI@tv-basicstudies"
+                    ],
+                    "show_popup_button": true,
+                    "popup_width": "1000",
+                    "popup_height": "650",
+                    "save_image": true,
+                    "details": true,
+                    "hotlist": true,
+                    "calendar": true
+                });
+                
+                log('✅ TradingView виджет создан успешно', 'success');
+                updateStatus('TradingView виджет создан', 'success');
+                
+            } catch (error) {
+                log(`❌ Ошибка создания виджета: ${error.message}`, 'error');
+                updateStatus(`Ошибка: ${error.message}`, 'error');
+            }
+        }
+        
+        function testIframe() {
+            log('🖼️ Тестируем iFrame...', 'info');
+            
+            const container = document.getElementById('chart-container');
+            container.innerHTML = `
+                <iframe 
+                    src="https://www.tradingview.com/symbols/BINANCE-BTCUSDT/?interval=15&theme=dark"
+                    width="100%" 
+                    height="100%" 
+                    frameborder="0"
+                    allowfullscreen>
+                </iframe>
+            `;
+            
+            log('✅ iFrame создан', 'success');
+            updateStatus('iFrame загружен', 'success');
+        }
+        
+        // Автоматический тест при загрузке
+        window.addEventListener('load', function() {
+            log('🚀 Страница загружена', 'info');
+            setTimeout(testBasic, 1000);
+        });
+        
+        // Обработка ошибок
+        window.addEventListener('error', function(event) {
+            log(`❌ Ошибка: ${event.error}`, 'error');
+        });
+        
+        // Обработка сетевых ошибок
+        window.addEventListener('offline', function() {
+            log('❌ Соединение потеряно', 'error');
+        });
+        
+        window.addEventListener('online', function() {
+            log('✅ Соединение восстановлено', 'success');
+        });
+    </script>
+</body>
+</html> 

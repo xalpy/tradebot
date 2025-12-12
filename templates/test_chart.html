@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест графика через Flask</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        #chartContainer {
+            width: 100%;
+            height: 400px;
+            border: 1px solid #ccc;
+            margin-top: 20px;
+            background: #fff;
+        }
+        .btn {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-success { background: #28a745; color: white; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Тест графика через Flask сервер</h1>
+    
+    <div style="background: #e8f5e8; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+        <h3>✅ Этот файл открыт через Flask сервер</h3>
+        <p>Теперь API запросы будут работать корректно!</p>
+    </div>
+    
+    <div id="status"></div>
+    
+    <button class="btn btn-success" onclick="testCreateChart()">Создать график</button>
+    <button class="btn btn-primary" onclick="testRealData()">Тест реальных данных</button>
+    <button class="btn btn-primary" onclick="compareData()">Сравнить данные</button>
+    <button class="btn btn-danger" onclick="clearChart()">Очистить</button>
+    
+    <div id="chartContainer"></div>
+    
+    <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+    <script>
+        let chart = null;
+        
+        function addStatus(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.textContent = message;
+            document.getElementById('status').appendChild(div);
+        }
+        
+        function clearStatus() {
+            document.getElementById('status').innerHTML = '';
+        }
+        
+        function clearChart() {
+            if (chart) {
+                chart.remove();
+                chart = null;
+            }
+            document.getElementById('chartContainer').innerHTML = '';
+            addStatus('График очищен', 'info');
+        }
+        
+        async function testCreateChart() {
+            clearStatus();
+            addStatus('🧪 Тестируем создание графика...', 'info');
+            
+            try {
+                const chartContainer = document.getElementById('chartContainer');
+                
+                // Очищаем контейнер
+                chartContainer.innerHTML = '';
+                
+                // Создаем график
+                chart = LightweightCharts.createChart(chartContainer, {
+                    width: chartContainer.clientWidth,
+                    height: chartContainer.clientHeight,
+                    layout: {
+                        background: { color: '#ffffff' },
+                        textColor: '#333',
+                    },
+                    grid: {
+                        vertLines: { color: '#e1e1e1' },
+                        horzLines: { color: '#e1e1e1' },
+                    },
+                    crosshair: {
+                        mode: LightweightCharts.CrosshairMode.Normal,
+                    },
+                    rightPriceScale: {
+                        borderColor: '#cccccc',
+                        textColor: '#333',
+                    },
+                    timeScale: {
+                        borderColor: '#cccccc',
+                        textColor: '#333',
+                        timeVisible: true,
+                        secondsVisible: false,
+                    },
+                });
+                
+                addStatus('✅ График создан успешно!', 'success');
+                
+                // Добавляем серию свечей
+                const candlestickSeries = chart.addCandlestickSeries({
+                    upColor: '#26a69a',
+                    downColor: '#ef5350',
+                    borderVisible: false,
+                    wickUpColor: '#26a69a',
+                    wickDownColor: '#ef5350',
+                });
+                
+                addStatus('✅ Серия свечей добавлена', 'success');
+                
+                // Тестовые данные
+                const testData = [
+                    { time: 1640995200, open: 100.2, high: 105.5, low: 95, close: 102 },
+                    { time: 1640995260, open: 102, high: 108, low: 100, close: 106 },
+                    { time: 1640995320, open: 106, high: 110, low: 104, close: 108 },
+                ];
+                
+                // Анализ тестовых данных
+                addStatus('📋 Анализ тестовых данных:', 'info');
+                testData.forEach((item, index) => {
+                    addStatus(`📋 Запись ${index + 1}:`, 'info');
+                    addStatus(`   time: ${typeof item.time} = ${item.time}`, 'info');
+                    addStatus(`   open: ${typeof item.open} = ${item.open}`, 'info');
+                    addStatus(`   high: ${typeof item.high} = ${item.high}`, 'info');
+                    addStatus(`   low: ${typeof item.low} = ${item.low}`, 'info');
+                    addStatus(`   close: ${typeof item.close} = ${item.close}`, 'info');
+                });
+                
+                candlestickSeries.setData(testData);
+                addStatus('✅ Тестовые данные добавлены в график', 'success');
+                addStatus('🎉 График работает корректно!', 'success');
+                
+            } catch (error) {
+                addStatus(`❌ Ошибка: ${error.message}`, 'error');
+                console.error('Ошибка создания графика:', error);
+            }
+        }
+        
+        async function testRealData() {
+            clearStatus();
+            addStatus('🌐 Тестируем реальные данные от API...', 'info');
+            
+            try {
+                const response = await fetch('/api/klines/BTCUSDT?interval=15&limit=3');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                addStatus(`📊 Получено ${data.length} записей от API`, 'info');
+                
+                if (data.length === 0) {
+                    addStatus('❌ Нет данных от API', 'error');
+                    return;
+                }
+                
+                // Анализируем первую запись
+                const firstItem = data[0];
+                addStatus('📋 Анализ первой записи от API:', 'info');
+                addStatus(`   time: ${typeof firstItem.time} = ${firstItem.time}`, 'info');
+                addStatus(`   open: ${typeof firstItem.open} = ${firstItem.open}`, 'info');
+                addStatus(`   high: ${typeof firstItem.high} = ${firstItem.high}`, 'info');
+                addStatus(`   low: ${typeof firstItem.low} = ${firstItem.low}`, 'info');
+                addStatus(`   close: ${typeof firstItem.close} = ${firstItem.close}`, 'info');
+                
+                // Проверяем все поля
+                const allFields = ['time', 'open', 'high', 'low', 'close'];
+                const missingFields = allFields.filter(field => !(field in firstItem));
+                const extraFields = Object.keys(firstItem).filter(field => !allFields.includes(field));
+                
+                if (missingFields.length > 0) {
+                    addStatus(`❌ Отсутствуют поля: ${missingFields.join(', ')}`, 'error');
+                } else {
+                    addStatus('✅ Все необходимые поля присутствуют', 'success');
+                }
+                
+                if (extraFields.length > 0) {
+                    addStatus(`⚠️ Лишние поля: ${extraFields.join(', ')}`, 'info');
+                }
+                
+                // Проверяем типы данных
+                const allNumbers = allFields.every(field => typeof firstItem[field] === 'number');
+                addStatus(`🔢 Все значения - числа: ${allNumbers ? '✅' : '❌'}`, allNumbers ? 'success' : 'error');
+                
+                // Проверяем OHLC логику
+                const isValidOHLC = firstItem.high >= Math.max(firstItem.open, firstItem.close) && 
+                                   firstItem.low <= Math.min(firstItem.open, firstItem.close);
+                addStatus(`📈 OHLC логика: ${isValidOHLC ? '✅' : '❌'}`, isValidOHLC ? 'success' : 'error');
+                
+            } catch (error) {
+                addStatus(`❌ Ошибка получения данных: ${error.message}`, 'error');
+                console.error('Ошибка тестирования реальных данных:', error);
+            }
+        }
+        
+        async function compareData() {
+            clearStatus();
+            addStatus('🔄 Сравниваем тестовые и реальные данные...', 'info');
+            
+            try {
+                // Тестовые данные
+                const testData = [
+                    { time: 1640995200, open: 100.2, high: 105.5, low: 95, close: 102 },
+                    { time: 1640995260, open: 102, high: 108, low: 100, close: 106 },
+                    { time: 1640995320, open: 106, high: 110, low: 104, close: 108 },
+                ];
+                
+                // Реальные данные
+                const response = await fetch('/api/klines/BTCUSDT?interval=15&limit=3');
+                const realData = await response.json();
+                
+                addStatus('📊 Сравнение данных:', 'info');
+                addStatus(`   Тестовые: ${testData.length} записей`, 'info');
+                addStatus(`   Реальные: ${realData.length} записей`, 'info');
+                
+                if (realData.length === 0) {
+                    addStatus('❌ Нет реальных данных для сравнения', 'error');
+                    return;
+                }
+                
+                // Сравниваем структуру
+                const testKeys = Object.keys(testData[0]);
+                const realKeys = Object.keys(realData[0]);
+                
+                addStatus('🔍 Сравнение структуры:', 'info');
+                addStatus(`   Тестовые ключи: ${testKeys.join(', ')}`, 'info');
+                addStatus(`   Реальные ключи: ${realKeys.join(', ')}`, 'info');
+                
+                const structureMatch = JSON.stringify(testKeys.sort()) === JSON.stringify(realKeys.sort());
+                addStatus(`   Структура совпадает: ${structureMatch ? '✅' : '❌'}`, structureMatch ? 'success' : 'error');
+                
+                // Сравниваем типы
+                addStatus('🔢 Сравнение типов:', 'info');
+                const fields = ['time', 'open', 'high', 'low', 'close'];
+                
+                fields.forEach(field => {
+                    if (field in testData[0] && field in realData[0]) {
+                        const testType = typeof testData[0][field];
+                        const realType = typeof realData[0][field];
+                        const typeMatch = testType === realType;
+                        addStatus(`   ${field}: ${testType} vs ${realType} = ${typeMatch ? '✅' : '❌'}`, typeMatch ? 'success' : 'error');
+                    } else {
+                        addStatus(`   ${field}: отсутствует в одном из наборов`, 'error');
+                    }
+                });
+                
+            } catch (error) {
+                addStatus(`❌ Ошибка сравнения: ${error.message}`, 'error');
+                console.error('Ошибка сравнения данных:', error);
+            }
+        }
+        
+        // Автоматический тест при загрузке
+        window.addEventListener('load', function() {
+            addStatus('🚀 Страница загружена через Flask сервер', 'success');
+            addStatus('✅ API запросы будут работать корректно', 'success');
+        });
+    </script>
+</body>
+</html> 

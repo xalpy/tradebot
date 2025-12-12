@@ -1,0 +1,34 @@
+{
+  "strategies": {
+    "ETHUSDT": {
+      "balance_pct": 5,
+      "stop_loss": 40,
+      "take_profit": 40,
+      "timeframe": "60",
+      "type": "ghost"
+    },
+    "DOGEUSDT": {
+      "balance_pct": 5,
+      "stop_loss": 40,
+      "take_profit": 40,
+      "timeframe": "60",
+      "type": "ghost"
+    },
+    "LINKUSDT": {
+      "balance_pct": 15,
+      "leverage": 20,
+      "stop_loss": 40,
+      "take_profit": 50
+    },
+    "OPUSDT": {
+      "balance_pct": 5,
+      "take_profit": 40
+    },
+    "NEARUSDT": {
+      "balance_pct": 5,
+      "stop_loss": 40,
+      "take_profit": 50,
+      "timeframe": "5"
+    }
+  }
+}

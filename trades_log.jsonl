@@ -1,0 +1,12 @@
+{"event": "opened", "symbol": "LINKUSDT", "side": "Sell", "qty": 6.2, "price": 24.794, "timestamp": 1756999397.1110408, "time_iso": "2025-09-04T15:23:17.113054"}
+{"event": "opened", "symbol": "DOGEUSDT", "side": "Buy", "qty": 111.82, "price": 0.21761, "timestamp": 1757018562.492182, "time_iso": "2025-09-04T20:42:42.498393"}
+{"event": "opened", "symbol": "LINKUSDT", "side": "Buy", "qty": 6.11, "price": 23.81, "timestamp": 1757018750.185171, "time_iso": "2025-09-04T20:45:50.190066"}
+{"event": "closed", "symbol": "DOGEUSDT", "side": "Sell", "qty": 111.0, "price": 0.21769, "timestamp": 1757030433.8516366, "time_iso": "2025-09-05T00:00:33.851636"}
+{"event": "reversed", "symbol": "DOGEUSDT", "side": "Sell", "qty": 109.07, "price": 0.21769, "timestamp": 1757030435.1695523, "time_iso": "2025-09-05T00:00:35.169552"}
+{"event": "opened", "symbol": "OPUSDT", "side": "Buy", "qty": 33.21, "price": 0.7197, "timestamp": 1757033139.402865, "time_iso": "2025-09-05T00:45:39.402864"}
+{"event": "opened", "symbol": "DOGEUSDT", "side": "Sell", "qty": 119.09, "price": 0.21584, "timestamp": 1757083002.593582, "time_iso": "2025-09-05T14:36:42.593581"}
+{"event": "closed", "symbol": "ETHUSDT", "side": "Sell", "qty": 0.03, "price": 4401.41, "timestamp": 1757085439.6191754, "time_iso": "2025-09-05T15:17:19.619175"}
+{"event": "reversed", "symbol": "ETHUSDT", "side": "Sell", "qty": 0.01, "price": 4401.41, "timestamp": 1757085440.9380178, "time_iso": "2025-09-05T15:17:20.938017"}
+{"event": "opened", "symbol": "NEARUSDT", "side": "Buy", "qty": 10.62, "price": 2.402, "timestamp": 1757090433.7566247, "time_iso": "2025-09-05T16:40:33.758628"}
+{"event": "opened", "symbol": "LINKUSDT", "side": "Sell", "qty": 6.8, "price": 22.384, "timestamp": 1757099710.5216258, "time_iso": "2025-09-05T19:15:10.522624"}
+{"event": "opened", "symbol": "OPUSDT", "side": "Sell", "qty": 36.87, "price": 0.6852, "timestamp": 1757099713.346671, "time_iso": "2025-09-05T19:15:13.346671"}

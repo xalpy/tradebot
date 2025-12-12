@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Простой TradingView - TradeBot</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #1a1a1a;
+            color: white;
+            margin: 0;
+            padding: 20px;
+        }
+        .chart-frame {
+            width: 100%;
+            height: 80vh;
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        .controls {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .btn-custom {
+            background: linear-gradient(45deg, #00d4aa, #0099cc);
+            border: none;
+            color: white;
+            border-radius: 25px;
+            padding: 8px 16px;
+            margin: 0 5px;
+        }
+        .btn-custom:hover {
+            transform: translateY(-1px);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <h1 class="mb-4">📈 TradingView График</h1>
+        
+        <div class="controls">
+            <div class="row align-items-center">
+                <div class="col-md-3">
+                    <label class="form-label">Символ:</label>
+                    <select class="form-select" id="symbolSelect">
+                        <option value="BTCUSDT">BTCUSDT</option>
+                        <option value="ETHUSDT">ETHUSDT</option>
+                        <option value="SOLUSDT">SOLUSDT</option>
+                        <option value="ADAUSDT">ADAUSDT</option>
+                        <option value="DOTUSDT">DOTUSDT</option>
+                        <option value="LINKUSDT">LINKUSDT</option>
+                        <option value="MATICUSDT">MATICUSDT</option>
+                        <option value="AVAXUSDT">AVAXUSDT</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Интервал:</label>
+                    <select class="form-select" id="intervalSelect">
+                        <option value="1">1m</option>
+                        <option value="5">5m</option>
+                        <option value="15" selected>15m</option>
+                        <option value="30">30m</option>
+                        <option value="60">1h</option>
+                        <option value="240">4h</option>
+                        <option value="1D">1D</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Тема:</label>
+                    <select class="form-select" id="themeSelect">
+                        <option value="dark" selected>Темная</option>
+                        <option value="light">Светлая</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">&nbsp;</label>
+                    <div>
+                        <button class="btn btn-custom" onclick="updateChart()">
+                            <i class="fas fa-sync-alt"></i> Обновить
+                        </button>
+                        <button class="btn btn-custom" onclick="openFullscreen()">
+                            <i class="fas fa-expand"></i> Полный экран
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="chartContainer">
+            <iframe 
+                id="tradingviewFrame"
+                class="chart-frame"
+                src="https://www.tradingview.com/symbols/BINANCE-BTCUSDT/?interval=15&theme=dark"
+                allowfullscreen>
+            </iframe>
+        </div>
+        
+        <div class="mt-3 text-center">
+            <a href="/" class="btn btn-outline-light">
+                <i class="fas fa-arrow-left"></i> Вернуться к TradeBot
+            </a>
+        </div>
+    </div>
+
+    <script>
+        function updateChart() {
+            const symbol = document.getElementById('symbolSelect').value;
+            const interval = document.getElementById('intervalSelect').value;
+            const theme = document.getElementById('themeSelect').value;
+            
+            const iframe = document.getElementById('tradingviewFrame');
+            const url = `https://www.tradingview.com/symbols/BINANCE-${symbol}/?interval=${interval}&theme=${theme}`;
+            
+            iframe.src = url;
+        }
+        
+        function openFullscreen() {
+            const iframe = document.getElementById('tradingviewFrame');
+            if (iframe.requestFullscreen) {
+                iframe.requestFullscreen();
+            } else if (iframe.webkitRequestFullscreen) {
+                iframe.webkitRequestFullscreen();
+            } else if (iframe.msRequestFullscreen) {
+                iframe.msRequestFullscreen();
+            }
+        }
+        
+        // Обновляем график при изменении параметров
+        document.getElementById('symbolSelect').addEventListener('change', updateChart);
+        document.getElementById('intervalSelect').addEventListener('change', updateChart);
+        document.getElementById('themeSelect').addEventListener('change', updateChart);
+    </script>
+</body>
+</html> 
